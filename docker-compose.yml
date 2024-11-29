@@ -1,10 +1,16 @@
 networks:
   monitor-net:
+    name: monitor-net
     driver: bridge
+  frigatenetwork:
+    name: frigatenetwork
+    external: true
+
 
 volumes:
     prometheus_data: {}
     grafana_data: {}
+    loki_data: {}
 
 services:
 
@@ -140,12 +146,44 @@ services:
     image: rhysbailey/prometheus-frigate-exporter
     container_name: prometheus_frigate_exporter
     restart: unless-stopped
-    ports:
-      - 9104:9104
+    expose:
+      - '9104'
     environment:
-      FRIGATE_STATS_URL: "http://frigate.local.drugyacht.com:5000/api/stats" # Replace <your-frigate-ip> with your Frigate container IP
+      FRIGATE_STATS_URL: "http://frigate:5000/api/stats" # Replace <your-frigate-ip> with your Frigate container IP
       PORT: "9104"
     networks:
       - monitor-net
+      - frigatenetwork
     labels:
       org.label-schema.group: "monitoring"
+
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx_exporter
+    command:
+      - -nginx.scrape-uri
+      - http://npm:8090/nginx_status
+    expose:
+      - '9113'
+    networks:
+      - monitor-net
+      - frigatenetwork
+    labels:
+      org.label-schema.group: "monitoring"
+
+  loki:
+    image: grafana/loki
+    container_name: loki
+    expose:
+      - 3100
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitor-net
+      - frigatenetwork
+    volumes:
+      - loki_data:/loki # Loki persistent data folder
+      - ${REMOTE_DIR}/loki/config:/etc/loki # Loki config folder
+    labels:
+      org.label-schema.group: "monitoring"
+
+
