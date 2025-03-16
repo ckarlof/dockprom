@@ -56,6 +56,11 @@ scrape_configs:
     static_configs:
       - targets: ['immich_server:8082']
 
+  - job_name: immich_stats
+    static_configs:
+      - targets: ['immich_exporter:3000']
+
+
 alerting:
   alertmanagers:
   - scheme: http
