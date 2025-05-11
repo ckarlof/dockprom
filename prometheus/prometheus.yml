@@ -60,6 +60,29 @@ scrape_configs:
     static_configs:
       - targets: ['immich_exporter:3000']
 
+  - job_name: 'iperf3'
+    scrape_interval: 15m
+    metrics_path: /probe
+    static_configs:
+      - targets:
+        - bb.local.drugyacht.com
+    params:
+      port: ['5201']
+      # Optional: enable reverse mode
+      # reverse_mode: ['true']
+      # Optional: enable UDP mode
+      # udp_mode: ['true']
+      # Optional: set bitrate limit
+      # bitrate: ['100M']
+      # Optional: set test period
+      # period: ['10s']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: iperf3_querier_exporter:9579  # The iPerf3 exporter's real hostname:port.
 
 alerting:
   alertmanagers:
