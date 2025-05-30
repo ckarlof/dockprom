@@ -61,7 +61,7 @@ scrape_configs:
       - targets: ['immich_exporter:3000']
 
   - job_name: 'iperf3'
-    scrape_interval: 1d
+    scrape_interval: 1h
     metrics_path: /probe
     static_configs:
       - targets:
