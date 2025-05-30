@@ -61,7 +61,7 @@ scrape_configs:
       - targets: ['immich_exporter:3000']
 
   - job_name: 'iperf3'
-    scrape_interval: 15m
+    scrape_interval: 1d
     metrics_path: /probe
     static_configs:
       - targets:
@@ -85,7 +85,7 @@ scrape_configs:
         replacement: iperf3_querier_exporter:9579  # The iPerf3 exporter's real hostname:port.
     
   - job_name: 'speedtest-probe'
-    scrape_interval: 60m
+    scrape_interval: 1d
     scrape_timeout: 45s
     metrics_path: /probe
     static_configs:
