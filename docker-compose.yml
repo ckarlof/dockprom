@@ -20,6 +20,7 @@ services:
     volumes:
       - ${REMOTE_DIR}/prometheus:/etc/prometheus
       - prometheus_data:/prometheus
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -41,6 +42,7 @@ services:
     container_name: alertmanager
     volumes:
       - ${REMOTE_DIR}/alertmanager:/etc/alertmanager
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
@@ -59,6 +61,7 @@ services:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
       - /:/rootfs:ro
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
     command:
       - '--path.procfs=/host/proc'
       - '--path.rootfs=/rootfs'
@@ -84,6 +87,7 @@ services:
       - /sys:/sys:ro
       - /var/lib/docker:/var/lib/docker:ro
       - /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
     restart: unless-stopped
     expose:
       - 8080
@@ -99,6 +103,7 @@ services:
       - grafana_data:/var/lib/grafana
       - ${REMOTE_DIR}/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
       - ${REMOTE_DIR}/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
     environment:
 #      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
 #      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
@@ -116,6 +121,8 @@ services:
   pushgateway:
     image: prom/pushgateway:v1.11.2
     container_name: pushgateway
+    volumes:
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
     restart: unless-stopped
     expose:
       - 9091
@@ -135,6 +142,7 @@ services:
       - "9091:9091"
     volumes:
       - ${REMOTE_DIR}/caddy:/etc/caddy
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
     environment:
       - ADMIN_USER=${ADMIN_USER:-admin}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
@@ -152,9 +160,14 @@ services:
     restart: unless-stopped
     expose:
       - '9104'
+    volumes:
+      - /etc/ssl/certs/ca-certificates.crt:/etc/ssl/certs/ca-certificates.crt:ro
     environment:
       FRIGATE_STATS_URL: "http://frigate:5000/api/stats" # Replace <your-frigate-ip> with your Frigate container IP
       PORT: "9104"
+      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
+      SSL_CERT_DIR: /dev/null
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
     networks:
       - monitor-net
       - frigatenetwork
